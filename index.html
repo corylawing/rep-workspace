@@ -185,6 +185,22 @@
   .exhead{font-size:.72rem;font-weight:800;color:var(--accent-ink);display:flex;align-items:center;gap:.3rem;margin-bottom:.4rem;}
   .exhead svg{width:12px;height:12px;fill:var(--accent);stroke:none;}
   .exrow{font-size:.8rem;color:var(--ink);padding:.15rem 0;}
+  .judge{text-align:left;}
+  .jstep{display:flex;align-items:center;gap:.5rem;font-size:.82rem;font-weight:700;color:var(--accent-ink);margin:.2rem 0 .6rem;}
+  .jstep svg{width:15px;height:15px;fill:var(--accent);stroke:none;}
+  .spin{width:14px;height:14px;border:2px solid var(--accent-weak);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:spin .7s linear infinite;flex:0 0 auto;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .transcript{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.5rem .65rem;font-size:.78rem;color:var(--ink-2);display:flex;flex-direction:column;gap:.3rem;max-height:120px;overflow-y:auto;}
+  .tline{animation:fadein .3s ease;} .tline b{color:var(--ink);}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .exrow.reveal{animation:fadein .35s ease;}
+  .scorejump{margin-top:.7rem;border-top:1px dashed var(--line-2);padding-top:.7rem;}
+  .sj-row{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
+  .sj-row .arrow{color:var(--ink-3);} .sj-row b{font-size:1.05rem;}
+  .sj-grade{font-size:.68rem;font-weight:800;border-radius:1rem;padding:.1rem .5rem;margin-left:.2rem;}
+  .sj-q{margin-top:.6rem;background:var(--accent-weak);border-radius:10px;padding:.55rem .7rem;animation:fadein .4s ease;}
+  .sj-qh{font-size:.72rem;font-weight:800;color:var(--accent-ink);margin-bottom:.35rem;}
+  .sj-qi{font-size:.8rem;color:var(--ink);margin:.15rem 0;}
   /* next activity */
   .na-ok{display:flex;align-items:center;gap:.3rem;font-size:.74rem;color:#1f7d54;margin-top:.5rem;font-weight:600;}
   .na-ok svg{width:12px;height:12px;stroke:#1f7d54;fill:none;stroke-width:2;flex:0 0 auto;}
@@ -1326,17 +1342,46 @@ function openRec(r){
       <div id="exbox"></div></div>
     <div class="sheet-f"><button class="btn" data-close>Cancel</button><button class="btn grn" id="rsave" disabled>${isDisc?'Apply to discovery':'Attach note'}</button></div></div>`);
   const rec=el('rec'),rb=el('rb'),save=el('rsave');
-  rb.onclick=()=>{if(rec.classList.contains('on')){stopRec();if(isDisc)reveal();}else startRec();};
-  function reveal(){
-    const tg=extractTargets(r);el('stt').textContent='AI analyzed the conversation.';
-    const rows=tg.length?tg.map(k=>`<div class="exrow">✓ <b>${DIMLABEL[k]}</b> — ${INSIGHT[k]}</div>`).join(''):'<div class="exrow">Discovery already strong — nothing new to add.</div>';
-    el('exbox').innerHTML=`<div class="exbox"><div class="exhead">${IC.ai} AI captured from this call</div>${rows}</div>`;
+  rb.onclick=()=>{if(rec.classList.contains('on')){stopRec();rb.disabled=true;if(isDisc){save.disabled=true;judge();}}else startRec();};
+  function judge(){
+    const tg=extractTargets(r);
+    const proj=Object.assign({},r.disc);tg.forEach(k=>proj[k]=proj[k]==='missing'?'partial':'complete');
+    const before=discScore(r.disc),after=discScore(proj),afterG=discGrade(after),gc=gradeColor(afterG);
+    const box=el('exbox');el('stt').textContent='Processing the call…';
+    box.innerHTML=`<div class="judge"><div class="jstep" id="jstep"><span class="spin"></span> Transcribing call…</div><div class="transcript" id="tr"></div></div>`;
+    const tr=el('tr');
+    const lines=[['You','So walk me through where the current workflow slows you down.'],[r.doctor,'Honestly, the manual check-ins eat our chair time.'],['You','And what would success look like six months in?'],[r.doctor,'Fewer in-office visits, and more aligner starts.']];
+    let i=0;const streamT=setInterval(()=>{
+      if(i<lines.length){tr.insertAdjacentHTML('beforeend',`<div class="tline"><b>${lines[i][0]}:</b> ${lines[i][1]}</div>`);tr.scrollTop=tr.scrollHeight;i++;}
+      else{clearInterval(streamT);stageJudge();}
+    },600);
+    function stageJudge(){
+      el('jstep').innerHTML='<span class="spin"></span> AI judging your discovery…';
+      setTimeout(()=>{
+        el('jstep').innerHTML=`${IC.ai} What the AI captured`;
+        const wrap=document.createElement('div');wrap.className='exbox';box.querySelector('.judge').appendChild(wrap);
+        if(!tg.length){wrap.innerHTML='<div class="exrow">Discovery already strong — nothing new to add.</div>';return stageScore();}
+        let di=0;const dimStream=setInterval(()=>{
+          if(di<tg.length){const k=tg[di];wrap.insertAdjacentHTML('beforeend',`<div class="exrow reveal">✓ <b>${DIMLABEL[k]}</b> — ${INSIGHT[k]}</div>`);di++;}
+          else{clearInterval(dimStream);stageScore();}
+        },750);
+      },800);
+    }
+    function stageScore(){
+      const sc=document.createElement('div');sc.className='scorejump';
+      sc.innerHTML=`<div class="sj-row">Discovery score <b id="sjn">${before}</b><span class="arrow">→</span><b>${after}</b><span class="sj-grade" style="background:${gc[0]};color:${gc[1]}">grade ${afterG}</span></div>
+        ${discQuestions(proj).length?`<div class="sj-q"><div class="sj-qh">✨ Ask these in your next meeting</div>${discQuestions(proj).map(q=>`<div class="sj-qi">• ${q}</div>`).join('')}</div>`:''}`;
+      box.querySelector('.judge').appendChild(sc);
+      let n=before;const step=Math.max(1,Math.round((after-before)/16)||1);
+      const cnt=setInterval(()=>{n=Math.min(after,n+step);const e=el('sjn');if(e)e.textContent=n;if(n>=after)clearInterval(cnt);},45);
+      el('stt').textContent='AI analysis complete — apply it to the opportunity.';save.disabled=false;
+    }
   }
   save.onclick=()=>{
-    if(isDisc){const before=discScore(r.disc);extractTargets(r).forEach(k=>{r.disc[k]=r.disc[k]==='missing'?'partial':'complete';});const after=discScore(r.disc);closeSheet();openPanel(r.id);render();toast(`AI updated discovery: ${before} → ${after}/100 (grade ${discGrade(r.disc)})`);}
+    if(isDisc){const tg=extractTargets(r),before=discScore(r.disc);tg.forEach(k=>{r.disc[k]=r.disc[k]==='missing'?'partial':'complete';});const after=discScore(r.disc);closeSheet();openPanel(r.id);render();toast(`AI updated discovery: ${before} → ${after}/100 (grade ${discGrade(after)})`);}
     else{closeSheet();toast(`Voice note (${fmt(recS)}) attached to ${r.doctor}`);}
   };
-  function startRec(){recS=0;rec.classList.add('on');el('stt').textContent='Recording…';el('exbox').innerHTML='';
+  function startRec(){recS=0;rec.classList.add('on');el('stt').textContent='Recording… talk through your discovery call';el('exbox').innerHTML='';
     recT=setInterval(()=>{recS++;el('tm').textContent=fmt(recS);rec.querySelectorAll('.wave i').forEach(x=>x.style.height=(8+Math.random()*34)+'px');},250);}
 }
 function stopRec(){if(recT){clearInterval(recT);recT=null;}const rec=el('rec');if(rec){rec.classList.remove('on');const s=el('stt');if(s)s.textContent='Recorded. Attach or discard.';const sv=el('rsave');if(sv)sv.disabled=false;}}
