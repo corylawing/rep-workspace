@@ -544,7 +544,7 @@ const BOARDS={
     {id:'notnow',label:'Not Now',c:'#9aa0aa',archive:true},{id:'junk',label:'Junk',c:'#c98a1a',archive:true}]},
   portfolio:{name:'Sales Portfolio',sub:'Contacts with no active opportunity',icon:'portfolio',cols:[
     {id:'newp',label:'New to Portfolio',c:'#3d7fe0'},{id:'dormant',label:'Dormant',c:'#9aa0aa',auto:true,noManual:true},
-    {id:'working',label:'Working',c:'#2f9e6b',target:true},{id:'discover',label:'Discover',c:'#5b5bd6'},
+    {id:'working',label:'Working',c:'#2f9e6b',target:true},{id:'discover',label:'Ready — Open Opp',c:'#5b5bd6'},
     {id:'notint',label:'Not Interested',c:'#c98a1a',archive:true}]},
   opportunity:{name:'Opportunities',sub:'Your open deals — where you close',icon:'opportunity',cols:[
     {id:'odiscover',label:'Discover',c:'#3d7fe0'},{id:'consult',label:'Consult',c:'#5b5bd6'},
@@ -1313,8 +1313,8 @@ function openPanel(id){
         ${BOARDS[r.board].cols?`<button class="pri" data-act="move" data-id="${r.id}">${IC.move} Move stage</button>`:''}
         <button data-act="record" data-id="${r.id}">${IC.mic} Record</button>
         <button data-act="email" data-id="${r.id}">${IC.mail} Email</button>
-        <button data-act="logevent" data-id="${r.id}">${IC.cal} Log event</button>
-        <button data-act="logtask" data-id="${r.id}">${IC.task} Log task</button>
+        <button data-act="logevent" data-id="${r.id}">${IC.cal} Event</button>
+        <button data-act="logtask" data-id="${r.id}">${IC.task} Task</button>
         ${r.board==='customer'?`<button data-act="winback" data-id="${r.id}">${IC.bolt} Start winback</button>`:''}
       </div>
       <div class="note-hint">Fastest way to log a visit or call: tap Record and talk — the recorder captures it for you.</div></div>
