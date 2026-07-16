@@ -202,6 +202,17 @@
   .exhead{font-size:.72rem;font-weight:800;color:var(--accent-ink);display:flex;align-items:center;gap:.3rem;margin-bottom:.4rem;}
   .exhead svg{width:12px;height:12px;fill:var(--accent);stroke:none;}
   .exrow{font-size:.8rem;color:var(--ink);padding:.15rem 0;}
+  .disco-lbl{display:flex;align-items:center;gap:.4rem;}
+  .disc-help{margin-left:auto;font-size:.66rem;font-weight:700;color:var(--accent-ink);background:var(--accent-weak);border:0;border-radius:1rem;padding:.18rem .55rem;cursor:pointer;}
+  .disc-help:hover{background:#e2e0fb;}
+  .lnk{background:none;border:0;color:var(--accent-ink);font-size:.74rem;font-weight:600;cursor:pointer;padding:.3rem;margin-top:.4rem;text-decoration:underline;}
+  .rubric-intro{font-size:.84rem;line-height:1.5;color:var(--ink-2);background:linear-gradient(135deg,#f4f3ff,#eef4ff);border:1px solid #e2e0fb;border-radius:11px;padding:.7rem .8rem;margin-bottom:.6rem;}
+  .rubric-scale{font-size:.76rem;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:.5rem .7rem;margin-bottom:.8rem;line-height:1.5;}
+  .rubric-h2{font-size:.72rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:.5rem;}
+  .rubric-row{border-left:3px solid var(--accent);background:#faf9ff;border-radius:0 10px 10px 0;padding:.5rem .7rem;margin-bottom:.5rem;}
+  .rr-h{font-size:.86rem;font-weight:700;}
+  .rr-d{font-size:.78rem;color:var(--ink-2);margin:.15rem 0;line-height:1.4;}
+  .rr-q{font-size:.74rem;color:var(--accent-ink);font-weight:600;}
   .judge{text-align:left;}
   .jstep{display:flex;align-items:center;gap:.5rem;font-size:.82rem;font-weight:700;color:var(--accent-ink);margin:.2rem 0 .6rem;}
   .jstep svg{width:15px;height:15px;fill:var(--accent);stroke:none;}
@@ -378,10 +389,13 @@
   /* ---------- modal / sheet / recorder / toast ---------- */
   .scrim{position:absolute;inset:0;background:rgba(16,20,30,.42);display:none;align-items:center;justify-content:center;z-index:40;padding:1rem;}
   .scrim.show{display:flex;}
-  .sheet{background:#fff;border-radius:14px;width:100%;max-width:430px;box-shadow:var(--sh-2);overflow:hidden;}
+  #sheetHost{display:contents;}
+  .sheet{background:#fff;border-radius:14px;width:100%;max-width:430px;max-height:100%;box-shadow:var(--sh-2);overflow:hidden;display:flex;flex-direction:column;}
   .sheet-h{display:flex;align-items:center;padding:.85rem 1rem;border-bottom:1px solid var(--line);}
-  .sheet-h h3{font-size:1rem;} .sheet-h .x{margin-left:auto;border:0;background:transparent;font-size:1.3rem;color:var(--ink-3);min-width:var(--tap);min-height:var(--tap);}
-  .sheet-b{padding:1rem;}
+  .sheet-h h3{font-size:1rem;display:flex;align-items:center;gap:.35rem;}
+  .sheet-h h3 svg{width:16px;height:16px;flex:0 0 auto;fill:var(--accent);stroke:none;}
+  .sheet-h .x{margin-left:auto;border:0;background:transparent;font-size:1.3rem;color:var(--ink-3);min-width:var(--tap);min-height:var(--tap);}
+  .sheet-b{padding:1rem;overflow-y:auto;flex:1 1 auto;min-height:0;}
   .field{margin-bottom:.75rem;} .field label{display:block;font-size:.74rem;font-weight:600;color:var(--ink-2);margin-bottom:.3rem;}
   .field input,.field textarea{width:100%;border:1px solid var(--line-2);border-radius:9px;padding:.6rem;font-size:16px;font-family:inherit;background:var(--bg);}
   .field textarea{min-height:100px;resize:vertical;}
@@ -694,6 +708,27 @@ const discQuestions=d=>DIM_ORDER.map(x=>x[0]).filter(k=>d[k]!=='complete').sort(
 function discLearned(d){const got=DIM_ORDER.filter(([k])=>d[k]!=='missing').map(([,l])=>l);return got.length?`We've captured ${got.slice(0,-1).join(', ')}${got.length>1?' and ':''}${got.slice(-1)}.`:'Nothing captured yet — this is early discovery.';}
 function discMissing(d){const gap=DIM_ORDER.filter(([k])=>d[k]==='missing').map(([,l])=>l);return gap.length?`Still unclear: ${gap.join(', ')}. Focus your next meeting here before advancing to Consult.`:'Discovery is comprehensive across every dimension.';}
 function extractTargets(r){return DIM_ORDER.map(x=>x[0]).filter(k=>r.disc[k]!=='complete').sort((a,b)=>(r.disc[a]==='missing'?0:1)-(r.disc[b]==='missing'?0:1)).slice(0,2);}
+const DIMDESC={
+  dp:'How decisions get made and who signs off — the approval flow from your champion to the economic buyer.',
+  bg:"The practice's growth goals and the KPIs they actually track and care about.",
+  team:"Who's who — clinicians, coordinators — and who would own DentalMonitoring day-to-day.",
+  ops:'Where the current workflow costs them time, money, or chair time today.',
+  tech:'Scanners and practice software in use, and how open they are to integrating DM.',
+  need:'The outcome they want and the concrete value DentalMonitoring would create.',
+  time:"What's driving the timeline — events, budgets, or deadlines like a Q4 lock.",
+  buy:"How they'll choose between options — ROI, staff adoption, references, risk.",
+  next:'A concrete, agreed next action with the right people in the room.'
+};
+function openDiscRubric(){
+  const rows=DIM_ORDER.map(([k,label])=>`<div class="rubric-row"><div class="rr-h">${label}</div><div class="rr-d">${DIMDESC[k]}</div><div class="rr-q">Ask: ${QMAP[k]}</div></div>`).join('');
+  openSheet(`<div class="sheet"><div class="sheet-h"><h3>${IC.ai} Discovery — what the AI grades you on</h3><button class="x" data-close>×</button></div>
+    <div class="sheet-b">
+      <div class="rubric-intro">Discovery isn't a form. Your <b>Discovery Score</b> measures how well you understand the customer's business — its completeness and quality, <b>not</b> the odds of winning. You never fill 80 fields: record your calls and the AI fills these nine dimensions for you. Close the gaps before advancing to Consult.</div>
+      <div class="rubric-scale">Grades derived from the score: <b>A+</b> 95+ · <b>A</b> 88+ · <b>B+</b> 80+ · <b>B</b> 70+ · <b>C</b> 55+ · <b>D</b> below 55. Each dimension counts complete (full) · partial (half) · missing (none).</div>
+      <div class="rubric-h2">The nine dimensions</div>
+      ${rows}
+    </div></div>`);
+}
 function discoverySection(r){
   if(!r.disc)return '';
   const s=discScore(r.disc),g=discGrade(s),gc=gradeColor(g),circ=2*Math.PI*19;
@@ -701,7 +736,7 @@ function discoverySection(r){
     return `<div class="dimrow"><span class="dn">${label}</span><span class="dstate ${st}">${st}</span><span class="dbar"><i style="width:${pct}%"></i></span></div>`;}).join('');
   const qs=discQuestions(r.disc);
   return `<div class="p-sec disco">
-    <div class="lbl">${IC.ai} Discovery intelligence</div>
+    <div class="lbl disco-lbl">${IC.ai} Discovery intelligence <button class="disc-help" data-act="discinfo" data-id="${r.id}">What's graded?</button></div>
     <div class="disco-head">
       <div class="ring-wrap"><svg viewBox="0 0 44 44" class="ring"><circle class="bg" cx="22" cy="22" r="19"/><circle class="fg" cx="22" cy="22" r="19" style="stroke:${gc[1]};stroke-dasharray:${(circ*s/100).toFixed(1)} ${circ.toFixed(1)}"/></svg><div class="ring-num">${s}</div></div>
       <div class="disco-meta"><div class="score-lbl">Discovery score <span style="color:var(--ink-3);font-weight:500">/100</span></div>
@@ -1113,7 +1148,7 @@ function openCloseCat(r){
 /* ---------- actions ---------- */
 function wireActions(root){root.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{
   e.stopPropagation();const r=R.find(x=>x.id===+b.dataset.id);if(!r)return;const a=b.dataset.act;
-  if(a==='email')openEmail(r);else if(a==='record')openRec(r);else if(a==='move')openMove(r);else if(a==='winback')openWinback(r);else if(a==='open')openRecord(r);else if(a==='logevent')openLogEvent(r);else if(a==='logtask')openLogTask(r);
+  if(a==='email')openEmail(r);else if(a==='record')openRec(r);else if(a==='move')openMove(r);else if(a==='winback')openWinback(r);else if(a==='open')openRecord(r);else if(a==='logevent')openLogEvent(r);else if(a==='logtask')openLogTask(r);else if(a==='discinfo')openDiscRubric();
 });
 root.querySelectorAll('[data-star]').forEach(b=>b.onclick=e=>{e.stopPropagation();const r=R.find(x=>x.id===+b.dataset.star);if(!r)return;r.focus=!r.focus;toast(r.focus?'Marked as your focus ★':'Focus removed');render();if(el('panel').classList.contains('open')&&S.sel===r.id)openPanel(r.id);});}
 function openRecord(r){toast(`Opening ${r.obj} · ${r.doctor} in Salesforce`);}
@@ -1356,9 +1391,11 @@ function openRec(r){
     <div class="sheet-b"><div class="rec" id="rec"><div class="wave">${'<i></i>'.repeat(13)}</div>
       <div class="tm" id="tm">0:00</div><div class="stt" id="stt">${isDisc?'Tap to record — AI listens and fills your discovery':'Tap to record — saves to the timeline'}</div>
       <button class="rb" id="rb"><i></i></button></div>
+      ${isDisc?'<button class="lnk" id="discWhat" type="button">What the AI listens for →</button>':''}
       <div id="exbox"></div></div>
     <div class="sheet-f"><button class="btn" data-close>Cancel</button><button class="btn grn" id="rsave" disabled>${isDisc?'Apply to discovery':'Attach note'}</button></div></div>`);
   const rec=el('rec'),rb=el('rb'),save=el('rsave');
+  if(el('discWhat'))el('discWhat').onclick=openDiscRubric;
   rb.onclick=()=>{if(rec.classList.contains('on')){stopRec();rb.disabled=true;if(isDisc){save.disabled=true;judge();}}else startRec();};
   function judge(){
     const tg=extractTargets(r);
