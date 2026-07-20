@@ -10,14 +10,14 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DentalMonitoring">
 <meta property="og:title" content="Commercial Workspace — interactive mockup">
-<meta property="og:description" content="A unified Salesforce workspace for the commercial team: Leads → Portfolio → Opportunities → Customers, with AI discovery, KPIs and a leaderboard. One board that teaches itself.">
+<meta property="og:description" content="A unified Salesforce workspace for the commercial team: Leads → My Accounts → Opportunities → Customers, with AI discovery, KPIs and a leaderboard. One board that teaches itself.">
 <meta property="og:image" content="https://REPLACE-ME/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://REPLACE-ME/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Commercial Workspace — interactive mockup">
-<meta name="twitter:description" content="A unified Salesforce workspace for the commercial team: Leads → Portfolio → Opportunities → Customers, with AI discovery, KPIs and a leaderboard.">
+<meta name="twitter:description" content="A unified Salesforce workspace for the commercial team: Leads → My Accounts → Opportunities → Customers, with AI discovery, KPIs and a leaderboard.">
 <meta name="twitter:image" content="https://REPLACE-ME/og-image.png">
 <meta name="description" content="Interactive mockup of the DentalMonitoring Commercial Workspace — a unified Salesforce pipeline with AI discovery, KPIs and a leaderboard.">
 
@@ -96,8 +96,14 @@
   .chip select{border:0;background:transparent;font:inherit;color:inherit;font-weight:600;outline:none;}
 
   /* ---------- board area ---------- */
-  .surface{flex:1;min-height:0;overflow:auto;}
-  .board{display:flex;gap:.7rem;padding:.9rem;align-items:flex-start;height:100%;overflow-x:auto;}
+  .surface{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;}
+  .board{display:flex;gap:.7rem;padding:.9rem;align-items:flex-start;flex:1 1 auto;min-height:0;overflow-x:auto;overflow-y:hidden;}
+  .boardintro{flex:0 0 auto;margin:.9rem .9rem 0;background:linear-gradient(135deg,#f4f3ff,#eef4ff);border:1px solid #e2e0fb;border-radius:12px;padding:.7rem .9rem;}
+  .bi-flow{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--ink-3);font-weight:600;margin-bottom:.4rem;flex-wrap:wrap;}
+  .bi-flow b{color:var(--accent-ink);background:var(--accent-weak);border-radius:1rem;padding:.08rem .55rem;}
+  .bi-flow i{font-style:normal;color:var(--ink-3);}
+  .bi-text{font-size:.82rem;line-height:1.5;color:var(--ink-2);}
+  .bi-text b{color:var(--ink);}
   .col{flex:0 0 258px;display:flex;flex-direction:column;max-height:100%;}
   .col.collapsed{flex:0 0 190px;}
   .col.collapsed .col-h .nm{color:var(--ink-3);}
@@ -150,6 +156,7 @@
   .mynote:empty:before{content:attr(data-ph);color:var(--ink-3);}
   .mynote:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak);}
   .note-hint{font-size:.7rem;color:var(--ink-3);margin-top:.4rem;}
+  .mkt-note{font-size:.82rem;line-height:1.5;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:.55rem .7rem;}
   .col-body{background:transparent;border-radius:12px;padding:2px;display:flex;flex-direction:column;gap:.55rem;overflow-y:auto;flex:1;min-height:60px;}
   .col.dropok .col-body{outline:2px dashed var(--accent);outline-offset:2px;background:var(--accent-weak);border-radius:12px;}
   .swimhead{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);padding:.4rem .2rem .1rem;display:flex;align-items:center;gap:.35rem;}
@@ -485,6 +492,8 @@
               Territory: <span class="ms-sum" id="citySum">All cities</span><span class="ms-car">▾</span><div class="ms-pop" id="cityPop"></div></span>
             <span class="chip ms" id="fltSeg"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
               Segment: <span class="ms-sum" id="segSum">All</span><span class="ms-car">▾</span><div class="ms-pop" id="segPop"></div></span>
+            <span class="chip ms" id="fltPos"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+              Position: <span class="ms-sum" id="posSum">All</span><span class="ms-car">▾</span><div class="ms-pop" id="posPop"></div></span>
             <span class="chip" id="fltPri"><svg viewBox="0 0 24 24"><path d="M4 20V4M4 4l14 4-14 4"/></svg>
               Focus: <select id="priSel"><option value="all">All</option><option value="star">★ My focus</option></select></span>
             <span class="chip disabled">Date</span>
@@ -550,10 +559,10 @@ const BOARDS={
   lead:{name:'Lead Management',sub:'Leads not yet converted',icon:'lead',convertZone:true,cols:[
     {id:'new',label:'New',c:'#3d7fe0'},{id:'qualifying',label:'Qualifying',c:'#5b5bd6'},
     {id:'notnow',label:'Not Now',c:'#9aa0aa',archive:true},{id:'junk',label:'Junk',c:'#c98a1a',archive:true}]},
-  portfolio:{name:'Sales Portfolio',sub:'Contacts with no active opportunity',icon:'portfolio',cols:[
-    {id:'newp',label:'New to Portfolio',c:'#3d7fe0'},{id:'dormant',label:'Dormant',c:'#9aa0aa',auto:true,noManual:true},
+  portfolio:{name:'My Accounts',sub:'Doctors you own — develop them into opportunities',icon:'portfolio',intro:'<div class="bi-flow"><span>Leads</span><i>›</i><b>My Accounts</b><i>›</i><span>Opportunities</span></div><div class="bi-text"><b>Your book of doctors to develop.</b> They\'ve already cleared lead qualification and been converted — now they\'re yours to grow, not raw leads. Work the relationship (visits, calls, events) until a doctor\'s ready for a first meeting, then open an opportunity. Data isn\'t always perfect: if someone was qualified in error or isn\'t really a fit, mark them <b>Not Qualified</b>; if they\'re just not open right now, mark <b>Not Interested</b>. With hundreds of contacts, filter by segment, position, territory and engagement to spend your time where it counts.</div>',cols:[
+    {id:'newp',label:'New',c:'#3d7fe0'},{id:'dormant',label:'Dormant',c:'#9aa0aa',auto:true,noManual:true},
     {id:'working',label:'Working',c:'#2f9e6b',target:true},{id:'discover',label:'Ready — Open Opp',c:'#5b5bd6'},
-    {id:'notint',label:'Not Interested',c:'#c98a1a',archive:true}]},
+    {id:'notint',label:'Not Interested',c:'#c98a1a',archive:true},{id:'notqual',label:'Not Qualified',c:'#a15c5c',archive:true}]},
   opportunity:{name:'Opportunities',sub:'Your open deals — where you close',icon:'opportunity',cols:[
     {id:'odiscover',label:'Discover',c:'#3d7fe0'},{id:'consult',label:'Consult',c:'#5b5bd6'},
     {id:'close',label:'Close',c:'#e07800',swim:['Red Hot','On Hold']},
@@ -572,11 +581,11 @@ const CW={green:['var(--green-w)','#1f7d54'],blue:['var(--blue-w)','#2f6ac4'],am
 /* ---------- data ---------- */
 let R=[
   // leads — no segmentation yet (assigned on Portfolio). Simple: where it came from, qualify, convert/Junk/Not Now
-  {id:1,obj:'Lead',board:'lead',stage:'new',doctor:'Dr. Dana Whitfield',practice:'Northwind Dental',cl:'A',city:'Austin',area:'NAM East',pri:'Med',position:'Orthodontist',ortho:48,dup:false,escore:72,hasActivity:true,source:'Webinar',sourceDetail:'Aligner webinar — Mar',email:'dana.whitfield@northwind.com',phone:'(512) 555-0142',addr:'1240 Oak St, Austin, TX 78701',last:'2d ago',next:'Qualify',overdue:false,newLead:true},
-  {id:2,obj:'Lead',board:'lead',stage:'new',doctor:'Dr. Marcus Bell',practice:'Cloud9 Orthodontics',cl:'B',city:'Denver',area:'NAM West',pri:'High',position:'Practice Owner · Ortho',ortho:120,dup:false,escore:95,hasActivity:false,source:'Inbound',sourceDetail:'Pricing page',email:'marcus.bell@cloud9ortho.com',phone:'(303) 555-0199',addr:'88 Larimer Sq, Denver, CO 80202',last:'5h ago',next:'Qualify',overdue:true,newLead:true},
-  {id:3,obj:'Lead',board:'lead',stage:'qualifying',doctor:'Dr. Priya Raman',practice:'Helix Dental Group',cl:'A',city:'Austin',area:'NAM East',pri:'High',position:'Orthodontist',ortho:90,dup:false,escore:88,hasActivity:true,source:'Event',sourceDetail:'AAO 2026 booth',email:'priya.raman@helixdental.com',phone:'(512) 555-0177',addr:'5600 Mesa Dr, Austin, TX 78731',last:'1d ago',next:'Convert',overdue:false},
-  {id:4,obj:'Lead',board:'lead',stage:'notnow',doctor:'Dr. Owen Pierce',practice:'Cedar Family Dental',cl:'B',city:'Portland',area:'NAM West',pri:'Low',position:'General Dentist',ortho:8,dup:false,escore:40,hasActivity:true,source:'Web form',sourceDetail:'Contact form',email:'owen.pierce@cedarfamily.com',phone:'(503) 555-0121',addr:'312 SE Belmont, Portland, OR 97214',last:'3w ago',next:'Low ortho volume',overdue:false},
-  {id:5,obj:'Lead',board:'lead',stage:'junk',doctor:'Dr. (unverified)',practice:'—',cl:'A',city:'—',area:'NAM East',pri:'Low',position:'Unknown',ortho:0,dup:true,escore:8,hasActivity:false,source:'List import',sourceDetail:'Purchased list',email:'—',phone:'—',addr:'—',last:'1mo ago',next:'Duplicate',overdue:false},
+  {id:1,obj:'Lead',board:'lead',stage:'new',doctor:'Dr. Dana Whitfield',practice:'Northwind Dental',cl:'A',city:'Austin',area:'NAM East',pri:'Med',position:'Orthodontist',ortho:48,dup:false,escore:72,hasActivity:true,source:'Webinar',sourceDetail:'Aligner webinar — Mar',mktNote:'Attended the March aligner webinar and asked about ROI for a 3-doctor practice. Opened 2 follow-up emails.',email:'dana.whitfield@northwind.com',phone:'(512) 555-0142',addr:'1240 Oak St, Austin, TX 78701',last:'2d ago',next:'Qualify',overdue:false,newLead:true},
+  {id:2,obj:'Lead',board:'lead',stage:'new',doctor:'Dr. Marcus Bell',practice:'Cloud9 Orthodontics',cl:'B',city:'Denver',area:'NAM West',pri:'High',position:'Practice Owner · Ortho',ortho:120,dup:false,escore:95,hasActivity:false,source:'Inbound',sourceDetail:'Pricing page',mktNote:'Viewed the pricing page 3x this week and requested a callback — high intent, reach out fast.',email:'marcus.bell@cloud9ortho.com',phone:'(303) 555-0199',addr:'88 Larimer Sq, Denver, CO 80202',last:'5h ago',next:'Qualify',overdue:true,newLead:true},
+  {id:3,obj:'Lead',board:'lead',stage:'qualifying',doctor:'Dr. Priya Raman',practice:'Helix Dental Group',cl:'A',city:'Austin',area:'NAM East',pri:'High',position:'Orthodontist',ortho:90,dup:false,escore:88,hasActivity:true,source:'Event',sourceDetail:'AAO 2026 booth',mktNote:'Stopped by the AAO 2026 booth; interested in remote monitoring for aligner cases. Left a business card.',email:'priya.raman@helixdental.com',phone:'(512) 555-0177',addr:'5600 Mesa Dr, Austin, TX 78731',last:'1d ago',next:'Convert',overdue:false},
+  {id:4,obj:'Lead',board:'lead',stage:'notnow',doctor:'Dr. Owen Pierce',practice:'Cedar Family Dental',cl:'B',city:'Portland',area:'NAM West',pri:'Low',position:'General Dentist',ortho:8,dup:false,escore:40,hasActivity:true,source:'Web form',sourceDetail:'Contact form',mktNote:'General web-form enquiry. Low ortho volume flagged by marketing — qualify carefully.',email:'owen.pierce@cedarfamily.com',phone:'(503) 555-0121',addr:'312 SE Belmont, Portland, OR 97214',last:'3w ago',next:'Low ortho volume',overdue:false},
+  {id:5,obj:'Lead',board:'lead',stage:'junk',doctor:'Dr. (unverified)',practice:'—',cl:'A',city:'—',area:'NAM East',pri:'Low',position:'Unknown',ortho:0,dup:true,escore:8,hasActivity:false,source:'List import',sourceDetail:'Purchased list',mktNote:'Imported from a purchased list — unverified. Likely junk unless confirmed.',email:'—',phone:'—',addr:'—',last:'1mo ago',next:'Duplicate',overdue:false},
   // portfolio (contacts, no active opp) — engagement drives Dormant surfacing
   {id:6,obj:'Contact',board:'portfolio',stage:'newp',doctor:'Dr. Sofia Nguyen',practice:'Vantiq Dental',cl:'B',city:'Denver',area:'NAM West',seg:'P2',pri:'Med',engagement:55,last:'4d ago',next:'Intro meeting',overdue:false},
   {id:7,obj:'Contact',board:'portfolio',stage:'dormant',doctor:'Dr. Leah Cho',practice:'Brightsmile Studio',cl:'A',city:'Austin',area:'NAM East',seg:'P1',pri:'Low',engagement:82,last:'62d ago',next:'Re-engage',overdue:true},
@@ -687,8 +696,14 @@ function sortCol(list,stage){
 }
 
 /* ---------- state ---------- */
-let S={board:'today',dev:'desktop',search:'',focus:'all',cities:[],segs:[],stage:null,custStage:null,expanded:[],kpiPeriod:'month',lbScope:'area',sel:null};
+let S={board:'today',dev:'desktop',search:'',focus:'all',cities:[],segs:[],positions:[],stage:null,custStage:null,expanded:[],kpiPeriod:'month',lbScope:'area',sel:null};
 [2,11].forEach(id=>{const _r=R.find(x=>x.id===id);if(_r)_r.focus=true;});
+// normalized doctor position for filtering (Orthodontist / GP Orthodontist / Dentist)
+const POSES=['Orthodontist','GP Orthodontist','Dentist'];
+R.forEach((r,i)=>{
+  if(r.obj==='Lead'&&r.position){r.pos=/ortho/i.test(r.position)?(/owner|gp|general/i.test(r.position)?'GP Orthodontist':'Orthodontist'):(/dentist/i.test(r.position)?'Dentist':'Orthodontist');}
+  else{r.pos=POSES[i%3];}
+});
 
 /* ---------- helpers ---------- */
 const el=id=>document.getElementById(id);
@@ -698,6 +713,7 @@ function matches(r){
   if(S.focus==='star'&&!r.focus)return false;
   if(S.cities.length&&!S.cities.includes(r.city))return false;
   if(S.segs.length&&!S.segs.includes(r.seg))return false;
+  if(S.positions.length&&!S.positions.includes(r.pos))return false;
   return true;
 }
 function firstStage(bd){return BOARDS[bd].cols?BOARDS[bd].cols[0].id:null;}
@@ -884,8 +900,8 @@ function openKpiModal(kind,rev,plabel){
 /* ---------- guidance: taglines, descriptions, nudges ---------- */
 const COLTAG={
   'lead:new':'Acknowledge fast','lead:qualifying':'Research the fit','lead:notnow':'Not ready — revisit later','lead:junk':'Never contact',
-  'portfolio:newp':'Prioritise & meet','portfolio:dormant':'Pick quick wins','portfolio:working':'Actively engaging','portfolio:discover':'Opens an Opportunity','portfolio:notint':'Revisit over time',
-  'opportunity:odiscover':'Qualify the deal','opportunity:consult':'Prove the value','opportunity:close':'Commercials & signature','opportunity:won':'Signed → onboarding','opportunity:lost':'Returns to Portfolio'
+  'portfolio:newp':'Prioritise & meet','portfolio:dormant':'Pick quick wins','portfolio:working':'Actively engaging','portfolio:discover':'Opens an Opportunity','portfolio:notint':'Revisit over time','portfolio:notqual':'Bad fit / bad data',
+  'opportunity:odiscover':'Qualify the deal','opportunity:consult':'Prove the value','opportunity:close':'Commercials & signature','opportunity:won':'Signed → onboarding','opportunity:lost':'Returns to My Accounts'
 };
 const COLDESC={
   'lead:new':{what:'Brand-new leads to acknowledge fast.',todo:['Check for a duplicate first — if it matches an existing contact/account, merge it.','Every lead that isn\'t a duplicate or junk should be contacted.','Engagement score 90–100 means they want to hear from us — reach out repeatedly until you land a meeting.','Lower score? Contact them and qualify the ortho fit, then Convert or park in Not Now / Junk.']},
@@ -897,11 +913,12 @@ const COLDESC={
   'portfolio:working':{what:'Actively engaging — an activity was logged on the doctor in the last 30 days.',todo:['Keep the momentum going toward a first meeting.','You can also pull a contact here to actively target them.']},
   'portfolio:discover':{what:'Ready for a deal — moving a contact here opens an Opportunity.',todo:['Only move here after a first meeting with the doctor, past the front gate.']},
   'portfolio:notint':{what:'They told you to stay away for now.',todo:['Revisit from time to time — opinions and situations change.','They can re-enter your pipeline later.']},
+  'portfolio:notqual':{what:"Shouldn't be in your book — wrong data or not a real fit.",todo:['Use when the record was qualified in error, or the doctor is not ortho-relevant.','Parks them out of your working list without deleting anything.']},
   'opportunity:odiscover':{what:'Is there a real opportunity? You are still qualifying.',todo:['Learn the practice, pain points and current workflows.','Qualify budget/timeline and find the decision makers.','Run discovery calls.']},
   'opportunity:consult':{what:'Qualified — now prove the value.',todo:['Demos, ROI discussions, workflow conversations, pilots.','Handle objections while DM is being evaluated.']},
   'opportunity:close':{what:'Commercial stage — heading toward signature.',todo:['Pricing, terms, approvals, procurement, negotiation.','Track the category: Red Hot / On Hold.','Watch the Order Form Sent / Viewed badges.']},
   'opportunity:won':{what:'Signed — the customer moves into onboarding.',todo:['Hand off cleanly so onboarding starts fast.']},
-  'opportunity:lost':{what:"Will not proceed — and that's OK.",todo:['Set a Closed Lost Reason.','The contact returns to your Portfolio for later.']}
+  'opportunity:lost':{what:"Will not proceed — and that's OK.",todo:['Set a Closed Lost Reason.','The contact returns to your accounts for later.']}
 };
 function nudge(r){
   if(r.obj==='Lead'){
@@ -936,7 +953,7 @@ function wireInfo(root){root.querySelectorAll('[data-info]').forEach(b=>b.onclic
 function renderRail(){
   const rail=el('rail'); rail.querySelectorAll('button').forEach(b=>b.remove());
   RAIL_ORDER.forEach(k=>{const b=BOARDS[k];const btn=document.createElement('button');
-    btn.className=S.board===k?'on':'';btn.innerHTML=IC[b.icon]+`<span>${({today:'Today',lead:'Leads',portfolio:'Portfolio',opportunity:'Opps',customer:'Customers',reactivation:'Reactivate',kpi:'KPIs',leaderboard:'Leaders'})[k]}</span>`;
+    btn.className=S.board===k?'on':'';btn.innerHTML=IC[b.icon]+`<span>${({today:'Today',lead:'Leads',portfolio:'My Accounts',opportunity:'Opps',customer:'Customers',reactivation:'Reactivate',kpi:'KPIs',leaderboard:'Leaders'})[k]}</span>`;
     btn.title=b.name;btn.dataset.board=k;btn.onclick=()=>switchBoard(k);rail.appendChild(btn);});
   const bar=el('mobBoardBar');bar.innerHTML=RAIL_ORDER.map(k=>`<button data-b="${k}" class="${S.board===k?'on':''}">${BOARDS[k].name}</button>`).join('');
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>switchBoard(b.dataset.b));
@@ -1010,6 +1027,7 @@ function renderKanban(){
   const b=BOARDS[S.board];
   const cols=b.cols;
   surface.innerHTML='';
+  if(b.intro){const bi=document.createElement('div');bi.className='boardintro';bi.innerHTML=b.intro;surface.appendChild(bi);}
   const board=document.createElement('div');board.className='board';
   cols.forEach((col)=>{
     const list=sortCol(R.filter(r=>r.board===S.board&&r.stage===col.id&&matches(r)),col.id);
@@ -1018,7 +1036,8 @@ function renderKanban(){
     const c=document.createElement('div');c.className='col'+(collapsed?' collapsed':'');c.dataset.stage=col.id;
     let bodyInner='';
     if(collapsed){
-      bodyInner=`<button class="expandbtn" data-exp="${col.id}">View ${list.length} ${list.length===1?'lead':'leads'} ›</button>`;
+      const noun=S.board==='lead'?'lead':'contact';
+      bodyInner=`<button class="expandbtn" data-exp="${col.id}">View ${list.length} ${list.length===1?noun:noun+'s'} ›</button>`;
     } else if(col.swim){
       col.swim.forEach(sw=>{const sub=list.filter(r=>r.momentum===sw);
         bodyInner+=`<div class="swimhead"><span class="s" style="background:${col.c}"></span>${sw} · ${sub.length}</div>`+sub.map(cardHTML).join('');});
@@ -1056,14 +1075,14 @@ function renderKanban(){
   else mh=list.map(cardHTML).join('');
   const mkey=S.board+':'+S.stage;
   const help=COLTAG[mkey]?`<div class="mob-help"><span>${COLTAG[mkey]}</span><button class="colinfo" data-info="${mkey}">i</button></div>`:'';
-  mobcol.innerHTML=help+(mh||`<div class="empty">Nothing in ${col.label} yet.</div>`);
+  mobcol.innerHTML=(b.intro?`<div class="boardintro" style="margin:.2rem 0 .8rem">${b.intro}</div>`:'')+help+(mh||`<div class="empty">Nothing in ${col.label} yet.</div>`);
   wireActions(mobcol);wireCardClick(mobcol);wireInfo(mobcol);
 }
 
 /* ---------- Customer (read-only Kanban) ---------- */
 function renderCustomer(){
   const stages=BOARDS.customer.stages;
-  const info=`<div class="roinfo">${IC.lock} Customer stages are automatic (onboarding &amp; health) — read only. Watch <b>First Scan trend</b> most closely: when first scans decline, MUSP declines later.</div>`;
+  const info=`<div class="roinfo">${IC.lock} These customer stages update automatically — this board is read-only. Your key early warning is the <b>First Scan trend</b>: when first scans start to decline, MUSP falls soon after.</div>`;
   let cols='';
   stages.forEach(st=>{const cc=CW[custColor(st)];
     const list=sortCol(R.filter(r=>r.board==='customer'&&r.custStage===st&&matches(r)),st);
@@ -1110,7 +1129,7 @@ function renderToday(){
     <h2>Good morning</h2><div class="sub">Your focus for today.</div>
     <div class="tsec"><div class="th"><span class="ic" style="background:var(--accent)">${IC.task}</span>My tasks<span class="cnt">· ${openT.length} open</span></div>
       ${TASKS.map(taskRow).join('')}</div>
-    ${sec('warn','#b23636','Opportunities with no next activity',noNa,r=>rowT(r,r.nextStep||'Needs a task or event — or move to Portfolio'))}
+    ${sec('warn','#b23636','Opportunities with no next activity',noNa,r=>rowT(r,r.nextStep||'Needs a task or event — or move to My Accounts'))}
     ${sec('bolt','#e07800','Buying signals',signals,r=>rowT(r,'Order form viewed — follow up now'))}
     ${sec('clock','#d64a4a','Overdue next actions',overdue,r=>rowT(r,r.next))}
     ${sec('lead','#3d7fe0','New leads',newLeads,r=>rowT(r,r.next))}
@@ -1169,7 +1188,7 @@ function openMove(r){
   const b=BOARDS[r.board];let opts='';
   if(r.board==='lead'){
     b.cols.forEach(c=>{if(c.id!==r.stage)opts+=optBtn(c.c,c.label,r.id,'lead:'+c.id);});
-    opts+=optBtn('var(--accent)','Convert → Sales Portfolio',r.id,'convert',true,'creates Contact');
+    opts+=optBtn('var(--accent)','Convert → My Accounts',r.id,'convert',true,'creates Contact');
   } else if(r.board==='portfolio'){
     b.cols.forEach(c=>{if(c.id===r.stage||c.noManual)return;
       if(c.id==='discover')opts+=optBtn(c.c,'Discover',r.id,'discover',true,'creates Opportunity');
@@ -1185,7 +1204,7 @@ function openMove(r){
       } else if(c.id==='won'){opts+=optBtn(c.c,'Closed Won',r.id,'won',true,'→ Customer');}
       else opts+=optBtn(c.c,c.label,r.id,'opp:'+c.id);
     });
-    opts+=optBtn('#9aa0aa','← Back to Portfolio',r.id,'toportfolio',false,'de-stage deal');
+    opts+=optBtn('#9aa0aa','← Back to My Accounts',r.id,'toportfolio',false,'de-stage deal');
   }
   openSheet(`<div class="sheet"><div class="sheet-h"><h3>Move ${r.doctor}</h3><button class="x" data-close>×</button></div>
     <div class="sheet-b"><div class="movelist">${opts}</div></div></div>`);
@@ -1214,15 +1233,15 @@ function openConvert(r){
         ${chk(dupOK, dupOK?'Not a duplicate (dedup tool)':'Possible duplicate flagged by dedup tool')}
         ${chk(orthoOK, orthoOK?`${r.ortho} ortho cases/yr — worth pursuing`:`Only ${r.ortho} ortho cases/yr — below DM interest threshold`)}
       </div>
-      ${canConvert?'<p style="margin:.8rem 0 0;font-size:.82rem;color:var(--ink-2)">Converting creates the Contact and moves it into Sales Portfolio.</p>'
+      ${canConvert?'<p style="margin:.8rem 0 0;font-size:.82rem;color:var(--ink-2)">Converting creates the Contact and moves it into My Accounts.</p>'
         :'<p style="margin:.8rem 0 0;font-size:.82rem;color:#b23636">Fails qualification — send to Not Now or Junk instead of converting.</p>'}
     </div>
     <div class="sheet-f"><button class="btn" data-close>Cancel</button>
       ${canConvert
-        ? '<button class="btn pri" id="doConv">Convert to Portfolio</button>'
+        ? '<button class="btn pri" id="doConv">Convert to My Accounts</button>'
         : '<button class="btn" id="toNotNow">→ Not Now</button><button class="btn" id="toJunk">→ Junk</button>'}
     </div></div>`);
-  if(canConvert)el('doConv').onclick=()=>{r.board='portfolio';r.obj='Contact';r.stage='newp';r.newLead=false;r.engagement=50;r.seg='P2';r.next='Intro meeting';closeSheet();render();toast(`Qualified — ${r.doctor} added to Sales Portfolio`);};
+  if(canConvert)el('doConv').onclick=()=>{r.board='portfolio';r.obj='Contact';r.stage='newp';r.newLead=false;r.engagement=50;r.seg='P2';r.next='Intro meeting';closeSheet();render();toast(`Qualified — ${r.doctor} added to My Accounts`);};
   else{
     el('toNotNow').onclick=()=>{r.stage='notnow';r.next='Not ready';closeSheet();render();toast(`${r.doctor} → Not Now`);};
     el('toJunk').onclick=()=>{r.stage='junk';closeSheet();render();toast(`${r.doctor} → Junk`);};
@@ -1263,8 +1282,8 @@ function openPanel(id){
          <div class="kv"><span class="k"></span><span class="v" style="font-weight:500;color:var(--ink-2)">${r.na.subj}</span></div>
          <div class="kv"><span class="k">Next step comments</span><span class="v edit" style="max-width:60%">${r.nextStep||'—'}</span></div>`
       : `<div class="na-warn"><div class="h">${IC.warn} No next activity scheduled</div>
-         <p>Every open opportunity needs a future task or event. Without one this deal is drifting — schedule the next step, or move it back to Portfolio.</p>
-         <div class="btns"><button class="sched" data-sched="${r.id}">Schedule activity</button><button data-back="${r.id}">Move to Portfolio</button></div>
+         <p>Every open opportunity needs a future task or event. Without one this deal is drifting — schedule the next step, or move it back to My Accounts.</p>
+         <div class="btns"><button class="sched" data-sched="${r.id}">Schedule activity</button><button data-back="${r.id}">Move to My Accounts</button></div>
          <div class="kv" style="margin-top:.5rem"><span class="k">Next step comments</span><span class="v edit" style="max-width:60%">${r.nextStep||'—'}</span></div></div>`}
     </div>`;
   else if(r.obj==='Account')stageSec=`<div class="p-sec"><div class="lbl">Customer stage</div>
@@ -1279,7 +1298,7 @@ function openPanel(id){
     <div class="kv"><span class="k">Market size</span><span class="v">${r.market} regional threshold</span></div>
     <div class="kv"><span class="k">Share of Wallet</span><span class="v">${r.sow}% ${r.sow>=30?'(high)':'(low)'}</span></div>
     <div style="font-size:.72rem;color:var(--ink-3);margin-top:.4rem">${r.market} threshold × ${r.sow>=30?'high':'low'} SoW → ${r.seg}.</div></div>`;
-  else stageSec=`<div class="p-sec"><div class="lbl">${r.obj==='Lead'?'Lead status':'Portfolio status'}</div>
+  else stageSec=`<div class="p-sec"><div class="lbl">${r.obj==='Lead'?'Lead status':'Account status'}</div>
     <div class="kv"><span class="k">Stage</span><span class="v">${(BOARDS[r.board].cols.find(c=>c.id===r.stage)||{}).label||'—'}</span></div>
     <div class="kv"><span class="k">Next action</span><span class="v edit">${r.next}</span></div></div>`;
   p.innerHTML=`
@@ -1295,6 +1314,7 @@ function openPanel(id){
         <div class="kv"><span class="k">Doctor</span><span class="v">${r.doctor}</span></div>
         ${r.position?`<div class="kv"><span class="k">Position</span><span class="v">${r.position}</span></div>`:''}
         <div class="kv"><span class="k">Territory / Area</span><span class="v">${r.city||'—'} · ${r.area||'—'}</span></div>
+        <div class="kv"><span class="k">Position</span><span class="v">${r.pos||r.position||'—'}</span></div>
         <div class="kv"><span class="k">Segment</span><span class="v">${segBadge(r.seg)}</span></div>
         <div class="kv"><span class="k">My focus</span><span class="v"><button class="starbtn lg ${r.focus?'on':''}" data-star="${r.id}">${r.focus?'★ Focused':'☆ Add focus'}</button></span></div>
         <div class="kv"><span class="k">Last activity</span><span class="v">${r.last||'—'}</span></div></div>
@@ -1303,6 +1323,14 @@ function openPanel(id){
         <div class="kv"><span class="k">Email</span><span class="v qedit" contenteditable="true" data-field="email" data-id="${r.id}">${r.email||'—'}</span></div>
         <div class="kv"><span class="k">Phone</span><span class="v qedit" contenteditable="true" data-field="phone" data-id="${r.id}">${r.phone||'—'}</span></div>
         <div class="kv"><span class="k">Address</span><span class="v qedit" contenteditable="true" data-field="addr" data-id="${r.id}" style="max-width:62%">${r.addr||'—'}</span></div></div>`:''}
+      ${r.obj==='Lead'?`<div class="p-sec"><div class="lbl">Where this lead came from</div>
+        <div class="kv"><span class="k">Source</span><span class="v">${r.source||'—'}</span></div>
+        <div class="kv"><span class="k">Source detail</span><span class="v">${r.sourceDetail||'—'}</span></div>
+        <div class="kv"><span class="k">Engagement score</span><span class="v">${r.escore!=null?r.escore+'/100':'—'}</span></div></div>
+      <div class="p-sec"><div class="lbl">Notes from marketing</div>
+        <div class="mkt-note">${r.mktNote||'No notes from marketing.'}</div></div>
+      <div class="p-sec"><div class="lbl">What to do</div>
+        ${(()=>{const n=nudge(r),dd=COLDESC['lead:'+r.stage];return (n?`<div class="nudge ${n[0]}" style="margin:0 0 .55rem">${n[1]}</div>`:'')+(dd?`<ul class="info-steps">${dd.todo.map(s=>`<li>${s}</li>`).join('')}</ul>`:'');})()}</div>`:''}
       ${r.obj!=='Lead'?`<div class="p-sec"><div class="lbl">Account cluster</div>
         ${['RSM','AE','ISP','CX'].map(role=>`<div class="kv"><span class="k">${role}</span><span class="v">${(CLUSTERS[r.cl]||{})[role]||'—'}</span></div>`).join('')}</div>`:''}
       <div class="p-sec"><div class="lbl">Timeline</div><div class="tl">
@@ -1315,8 +1343,8 @@ function openPanel(id){
       <div class="p-sec"><div class="lbl">My notes</div>
         <div class="mynote" contenteditable="true" data-note="${r.id}" data-ph="Add a private note — only yours. Editable any time.">${r.myNote||''}</div>
         <div class="note-hint">Saved to your Salesforce note for this record — one note you can edit or add to, not a new note each time.</div></div>
-      <div class="p-sec"><div class="lbl">Cases</div>
-        <div class="kv"><span class="k">Open cases</span><span class="v">0</span></div></div>
+      ${r.obj!=='Lead'?`<div class="p-sec"><div class="lbl">Cases</div>
+        <div class="kv"><span class="k">Open cases</span><span class="v">0</span></div></div>`:''}
       <div class="p-sec"><div class="lbl">Quick actions</div><div class="qa">
         ${BOARDS[r.board].cols?`<button class="pri" data-act="move" data-id="${r.id}">${IC.move} Move stage</button>`:''}
         <button data-act="record" data-id="${r.id}">${IC.mic} Record</button>
@@ -1372,7 +1400,7 @@ function openSchedule(r){
 function moveBackToPortfolio(r){
   r.board='portfolio';r.obj='Contact';r.stage='working';r.next='Re-nurture';r.engagement=r.engagement||45;
   ['amount','close','momentum','of','na','nextStep','disc'].forEach(k=>delete r[k]);
-  closePanel();render();toast(`${r.doctor} moved back to Sales Portfolio`);
+  closePanel();render();toast(`${r.doctor} moved back to My Accounts`);
 }
 function closePanel(){el('panel').classList.remove('open');S.sel=null;}
 
@@ -1461,7 +1489,7 @@ el('devSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
 });
 el('search').oninput=e=>{S.search=e.target.value;buildSuggestions(e.target.value);render();};
 el('search').addEventListener('blur',()=>setTimeout(()=>{el('searchSug').classList.remove('show');},180));
-const SECLABEL={lead:'Leads',portfolio:'Portfolio',opportunity:'Opportunities',customer:'Customers'};
+const SECLABEL={lead:'Leads',portfolio:'My Accounts',opportunity:'Opportunities',customer:'Customers'};
 function buildSuggestions(q){
   const sug=el('searchSug');q=q.trim().toLowerCase();
   if(q.length<1){sug.classList.remove('show');return;}
@@ -1472,33 +1500,37 @@ function buildSuggestions(q){
   sug.querySelectorAll('[data-goid]').forEach(b=>b.onclick=()=>{const r=R.find(x=>x.id===+b.dataset.goid);sug.classList.remove('show');el('search').value='';S.search='';S.board=r.board;S.expanded=[];S.stage=firstStage(r.board);render();openPanel(r.id);});
 }
 // populate city filter from preloaded data
-function msSummary(key){const arr=key==='city'?S.cities:S.segs;if(!arr.length)return key==='city'?'All cities':'All';if(arr.length<=2)return arr.join(', ');return arr.length+(key==='city'?' cities':' segments');}
+const MSCONF={
+  city:{sum:'citySum',pop:'cityPop',chip:'fltCity',get:()=>S.cities,set:a=>{S.cities=a;},all:'All cities',allBtn:'All cities',unit:' cities',groups:()=>[{options:CITIES}]},
+  seg:{sum:'segSum',pop:'segPop',chip:'fltSeg',get:()=>S.segs,set:a=>{S.segs=a;},all:'All',allBtn:'All segments',unit:' segments',groups:()=>[{label:'Prospects',options:['P1','P2','P3','P4']},{label:'Customers',options:['E1','E2','E3','E4','E5']}]},
+  pos:{sum:'posSum',pop:'posPop',chip:'fltPos',get:()=>S.positions,set:a=>{S.positions=a;},all:'All',allBtn:'All positions',unit:' positions',groups:()=>[{options:['Orthodontist','GP Orthodontist','Dentist']}]}
+};
+function msSummary(key){const c=MSCONF[key],arr=c.get();if(!arr.length)return c.all;if(arr.length<=2)return arr.join(', ');return arr.length+c.unit;}
 function buildMs(key){
-  const arr=key==='city'?S.cities:S.segs;const pop=el(key==='city'?'cityPop':'segPop');
-  const groups=key==='city'?[{options:CITIES}]:[{label:'Prospects',options:['P1','P2','P3','P4']},{label:'Customers',options:['E1','E2','E3','E4','E5']}];
-  let h=`<button class="ms-all" data-all>All ${key==='city'?'cities':'segments'}</button>`;
-  groups.forEach(g=>{if(g.label)h+=`<div class="ms-grp">${g.label}</div>`;g.options.forEach(o=>{h+=`<label class="ms-opt"><input type="checkbox" data-v="${o}" ${arr.includes(o)?'checked':''}><span>${o}</span></label>`;});});
+  const c=MSCONF[key],arr=c.get(),pop=el(c.pop);
+  let h=`<button class="ms-all" data-all>${c.allBtn}</button>`;
+  c.groups().forEach(g=>{if(g.label)h+=`<div class="ms-grp">${g.label}</div>`;g.options.forEach(o=>{h+=`<label class="ms-opt"><input type="checkbox" data-v="${o}" ${arr.includes(o)?'checked':''}><span>${o}</span></label>`;});});
   pop.innerHTML=h;
-  pop.querySelector('[data-all]').onclick=e=>{e.stopPropagation();if(key==='city')S.cities=[];else S.segs=[];afterMs(key);};
-  pop.querySelectorAll('input[data-v]').forEach(cb=>cb.onchange=()=>{let a=(key==='city'?S.cities:S.segs).slice();const v=cb.dataset.v;if(cb.checked){if(!a.includes(v))a.push(v);}else a=a.filter(x=>x!==v);if(key==='city')S.cities=a;else S.segs=a;afterMs(key);});
+  pop.querySelector('[data-all]').onclick=e=>{e.stopPropagation();c.set([]);afterMs(key);};
+  pop.querySelectorAll('input[data-v]').forEach(cb=>cb.onchange=()=>{let a=c.get().slice();const v=cb.dataset.v;if(cb.checked){if(!a.includes(v))a.push(v);}else a=a.filter(x=>x!==v);c.set(a);afterMs(key);});
 }
-function afterMs(key){el(key==='city'?'citySum':'segSum').textContent=msSummary(key);el(key==='city'?'fltCity':'fltSeg').classList.toggle('active',(key==='city'?S.cities:S.segs).length>0);buildMs(key);render();}
-function closeAllMs(){['cityPop','segPop'].forEach(id=>el(id).classList.remove('show'));}
-['city','seg'].forEach(key=>{buildMs(key);const chip=el(key==='city'?'fltCity':'fltSeg'),pop=el(key==='city'?'cityPop':'segPop');
+function afterMs(key){const c=MSCONF[key];el(c.sum).textContent=msSummary(key);el(c.chip).classList.toggle('active',c.get().length>0);buildMs(key);render();}
+function closeAllMs(){Object.values(MSCONF).forEach(c=>el(c.pop).classList.remove('show'));}
+Object.keys(MSCONF).forEach(key=>{const c=MSCONF[key];buildMs(key);const chip=el(c.chip),pop=el(c.pop);
   chip.addEventListener('click',e=>{e.stopPropagation();if(pop.contains(e.target))return;const open=pop.classList.contains('show');closeAllMs();if(!open)pop.classList.add('show');});});
 document.addEventListener('click',closeAllMs);
 el('priSel').onchange=e=>{S.focus=e.target.value;el('fltPri').classList.toggle('active',S.focus!=='all');render();};
 
 /* ---------- coach ---------- */
 const CSTEPS=[
-  {sel:'#rail, #mobBoardBar',t:'Eight boards, one app',b:'Today and your scoreboard (KPIs, Leaderboard) up top, then your pipeline in order: Leads → Portfolio → Opportunities → Customers → Reactivation. You never leave the workspace or open a Salesforce object directly.'},
+  {sel:'#rail, #mobBoardBar',t:'Eight boards, one app',b:'Today and your scoreboard (KPIs, Leaderboard) up top, then your pipeline in order: Leads → My Accounts → Opportunities → Customers → Reactivation. You never leave the workspace or open a Salesforce object directly.'},
   {bd:'lead',sel:'.colinfo',t:'Not sure what to do? Tap the ⓘ',b:'Every column has an ⓘ and a short reminder line. Tap the ⓘ for a plain "what this is" plus a ✓ Do this checklist. This is how you learn the process as you work — no training needed.'},
   {bd:'lead',sel:'.card, #mobcol .card',t:'Leads: who is this, and act fast',b:'A lead card shows who and where, their ortho volume, and whether it\'s a duplicate. A high engagement score means the lead wants contact — the card nudges you to reach out repeatedly until you book a meeting. Check for a duplicate first; any other valid lead should be contacted, then convert or qualify.'},
-  {bd:'lead',sel:'.convertzone',t:'Drag to the Convert zone',b:'Drop a lead onto the Convert zone at the end to launch the guided convert flow. After that, deals graduate automatically — a converted lead moves to Portfolio, a contact you move to Discover opens an Opportunity, a win lands in Customers.'},
-  {bd:'portfolio',sel:'.card, #mobcol .card',t:'Segment drives your focus',b:'On Portfolio and Opportunities the P1–P4 / E1–E5 badge is the segment — it drives sort order so your best-potential practices float to the top. New and Dormant cards also show "near pipeline", engagement and "quick win" signals to help you plan visits.'},
+  {bd:'lead',sel:'.convertzone',t:'Drag to the Convert zone',b:'Drop a lead onto the Convert zone at the end to launch the guided convert flow. After that, deals graduate automatically — a converted lead moves to My Accounts, a contact you move to Discover opens an Opportunity, a win lands in Customers.'},
+  {bd:'portfolio',sel:'.card, #mobcol .card',t:'Segment drives your focus',b:'In My Accounts and Opportunities the P1–P4 / E1–E5 badge is the segment — it drives sort order so your best-potential practices float to the top. New and Dormant cards also show "near pipeline", engagement and "quick win" signals to help you plan visits.'},
   {bd:'portfolio',open:{board:'portfolio'},sel:'#panel',t:'Everything lives in the panel',b:'Click any card for the full detail panel — journey, contact quick-edit, My notes (one private note you can edit any time), the ★ focus toggle, and the ↗ to open the record in Salesforce. All actions — Move, Email, Record — live here to keep the board clean.'},
   {bd:'opportunity',open:{board:'opportunity',stage:'odiscover'},sel:'.disco',t:'Opportunities + AI discovery',b:'This is a Discover-stage opportunity\'s panel: the Discovery Score and grade, every dimension, AI-suggested questions, and the recorder that fills them straight from your call — no questionnaires. Cards also nudge you to keep a next activity, fix a stale close date, or invite the doctor to a Peer-to-Peer event.'},
-  {sel:'#search',t:'Search finds anything',b:'Search across Leads, Portfolio, Opps and Customers at once. Pick a suggestion and it jumps you straight to that record, wherever it lives.'},
+  {sel:'#search',t:'Search finds anything',b:'Search across Leads, My Accounts, Opps and Customers at once. Pick a suggestion and it jumps you straight to that record, wherever it lives.'},
   {bd:'kpi',sel:'.kpi-grid, #mobBoardBar [data-b="kpi"]',t:'Your KPIs, revenue-first',b:'Revenue leads, then Total Opps, Engagement Interactions and average per field day. Tap any number — revenue, a pipeline stage, an interaction type, a month — to see the list behind it.'},
   {bd:'leaderboard',sel:'.game, #mobBoardBar [data-b="leaderboard"]',t:'Leaderboard: how to climb',b:'See where you rank on Revenue and Engagement, by Sales Area or across your Global Region. Each metric tells you exactly what closes the gap to the next position.'},
   {sel:'#coachBtn',t:'Tour lives here',b:'Come back to this 🎓 button anytime. That\'s the whole app — go move some deals.'}
