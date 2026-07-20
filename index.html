@@ -81,6 +81,17 @@
   .chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:.35rem .6rem;font-size:.76rem;color:var(--ink-2);font-weight:500;min-height:2.1rem;}
   .chip.disabled{opacity:.55;}
   .chip.active{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-weak);}
+  .chip.ms{position:relative;cursor:pointer;}
+  .ms-sum{font-weight:600;color:var(--ink);} .chip.ms.active .ms-sum{color:var(--accent-ink);}
+  .ms-car{color:var(--ink-3);font-size:.65rem;margin-left:.1rem;}
+  .ms-pop{position:absolute;top:calc(100% + 6px);left:0;min-width:190px;max-height:300px;overflow-y:auto;background:var(--panel);border:1px solid var(--line-2);border-radius:11px;box-shadow:var(--sh-2);z-index:60;padding:.35rem;display:none;cursor:default;}
+  .ms-pop.show{display:block;}
+  .ms-grp{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);padding:.45rem .5rem .2rem;}
+  .ms-opt{display:flex;align-items:center;gap:.55rem;padding:.4rem .5rem;border-radius:7px;font-size:.83rem;color:var(--ink);cursor:pointer;min-height:2.1rem;font-weight:500;}
+  .ms-opt:hover{background:var(--bg);}
+  .ms-opt input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+  .ms-all{width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:.5rem;font-size:.78rem;font-weight:700;color:var(--accent-ink);cursor:pointer;margin-bottom:.25rem;}
+  .ms-all:hover{background:var(--bg);}
   .chip svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
   .chip select{border:0;background:transparent;font:inherit;color:inherit;font-weight:600;outline:none;}
 
@@ -470,13 +481,10 @@
           </div>
           <div class="row2" id="filters">
             <span class="chip disabled"><svg viewBox="0 0 24 24"><path d="M4 6h16M6 12h12M9 18h6"/></svg> Saved Views</span>
-            <span class="chip" id="fltCity"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-              Territory: <select id="citySel"><option value="all">All cities</option></select></span>
-            <span class="chip" id="fltSeg"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-              Segment: <select id="segSel"><option value="all">All</option>
-                <optgroup label="Prospects"><option>P1</option><option>P2</option><option>P3</option><option>P4</option></optgroup>
-                <optgroup label="Customers"><option>E1</option><option>E2</option><option>E3</option><option>E4</option><option>E5</option></optgroup>
-              </select></span>
+            <span class="chip ms" id="fltCity"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              Territory: <span class="ms-sum" id="citySum">All cities</span><span class="ms-car">▾</span><div class="ms-pop" id="cityPop"></div></span>
+            <span class="chip ms" id="fltSeg"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Segment: <span class="ms-sum" id="segSum">All</span><span class="ms-car">▾</span><div class="ms-pop" id="segPop"></div></span>
             <span class="chip" id="fltPri"><svg viewBox="0 0 24 24"><path d="M4 20V4M4 4l14 4-14 4"/></svg>
               Focus: <select id="priSel"><option value="all">All</option><option value="star">★ My focus</option></select></span>
             <span class="chip disabled">Date</span>
@@ -548,7 +556,7 @@ const BOARDS={
     {id:'notint',label:'Not Interested',c:'#c98a1a',archive:true}]},
   opportunity:{name:'Opportunities',sub:'Your open deals — where you close',icon:'opportunity',cols:[
     {id:'odiscover',label:'Discover',c:'#3d7fe0'},{id:'consult',label:'Consult',c:'#5b5bd6'},
-    {id:'close',label:'Close',c:'#e07800',swim:['Red Hot','On Hold','Pushed Out']},
+    {id:'close',label:'Close',c:'#e07800',swim:['Red Hot','On Hold']},
     {id:'won',label:'Closed Won',c:'#2f9e6b'},{id:'lost',label:'Closed Lost',c:'#d64a4a'}]},
   customer:{name:'Customer Portfolio',sub:'Stages set automatically — read only',icon:'customer',type:'customer',
     stages:['Onboarding','Not Onboarded Yet','Onboarded','Early Development','Developing','Not Developing','Churned','No First Scan / VPS','Not Onboarded (4+ months)']},
@@ -582,7 +590,7 @@ let R=[
   {id:11,obj:'Opportunity',board:'opportunity',stage:'consult',doctor:'Dr. Priya Raman',practice:'Helix Dental Group',cl:'A',city:'Austin',area:'NAM East',seg:'P1',pri:'High',amount:'$120,000',close:'Sep 15',last:'1d ago',next:'Present proposal',overdue:false,of:'sent',p2p:true,na:{type:'Event',date:'Jul 22',subj:'Proposal review call'},nextStep:'Present proposal to owner + office manager',disc:{dp:'complete',bg:'complete',team:'complete',ops:'complete',tech:'partial',need:'complete',time:'complete',buy:'complete',next:'complete'}},
   {id:12,obj:'Opportunity',board:'opportunity',stage:'close',momentum:'Red Hot',doctor:'Dr. Alan Cross',practice:'Beacon Orthodontics',cl:'B',city:'Seattle',area:'NAM West',seg:'P1',pri:'High',amount:'$96,000',close:'Jul 31',last:'3h ago',next:'Chase signature',overdue:true,of:'viewed',p2p:true,na:{type:'Task',date:'Jul 18',subj:'Chase signed order form'},nextStep:'Verbal yes — awaiting signature',disc:{dp:'complete',bg:'complete',team:'partial',ops:'complete',tech:'complete',need:'complete',time:'complete',buy:'complete',next:'complete'}},
   {id:13,obj:'Opportunity',board:'opportunity',stage:'close',momentum:'On Hold',doctor:'Dr. Nina Faye',practice:'Delta Dental Care',cl:'A',city:'Denver',area:'NAM West',seg:'P2',pri:'Med',amount:'$60,000',close:'Jul 8',pastClose:true,last:'6d ago',next:'Waiting on partner sign-off',overdue:false,of:'sent',p2p:false,na:null,nextStep:'Partner sign-off pending — no date set',disc:{dp:'complete',bg:'partial',team:'partial',ops:'complete',tech:'partial',need:'complete',time:'partial',buy:'partial',next:'complete'}},
-  {id:14,obj:'Opportunity',board:'opportunity',stage:'close',momentum:'Pushed Out',doctor:'Dr. Raj Patel',practice:'Summit Orthodontics',cl:'B',city:'Seattle',area:'NAM West',seg:'P3',pri:'Low',amount:'$40,000',close:'Jun 30',pastClose:true,last:'8d ago',next:'Re-confirm timeline',overdue:false,p2p:false,na:{type:'Task',date:'Sep 1',subj:'Re-confirm timeline'},nextStep:'Pushed to Q4 budget',disc:{dp:'partial',bg:'partial',team:'partial',ops:'complete',tech:'missing',need:'partial',time:'missing',buy:'partial',next:'partial'}},
+  {id:14,obj:'Opportunity',board:'opportunity',stage:'close',momentum:'On Hold',doctor:'Dr. Raj Patel',practice:'Summit Orthodontics',cl:'B',city:'Seattle',area:'NAM West',seg:'P3',pri:'Low',amount:'$40,000',close:'Jun 30',pastClose:true,last:'8d ago',next:'Re-confirm timeline',overdue:false,p2p:false,na:{type:'Task',date:'Sep 1',subj:'Re-confirm timeline'},nextStep:'Waiting on Q4 budget',disc:{dp:'partial',bg:'partial',team:'partial',ops:'complete',tech:'missing',need:'partial',time:'missing',buy:'partial',next:'partial'}},
   // customers (auto) — E-segment from Market Size × Share of Wallet
   {id:15,obj:'Account',board:'customer',custStage:'Onboarding',doctor:'Dr. Grace Orbit',practice:'Orbit Dental',cl:'A',city:'Austin',area:'NAM East',seg:'E1',pri:'Med',last:'Day 12',musp:8,fsPct:12,snap:3,market:'Above',sow:45},
   {id:16,obj:'Account',board:'customer',custStage:'Onboarded',doctor:'Dr. Ken Meridian',practice:'Meridian Dental',cl:'B',city:'Denver',area:'NAM West',seg:'E2',pri:'Low',last:'Steady',musp:142,fsPct:2,snap:40,market:'Above',sow:22},
@@ -679,7 +687,7 @@ function sortCol(list,stage){
 }
 
 /* ---------- state ---------- */
-let S={board:'today',dev:'desktop',search:'',focus:'all',city:'all',seg:'all',stage:null,custStage:null,expanded:[],kpiPeriod:'month',lbScope:'area',sel:null};
+let S={board:'today',dev:'desktop',search:'',focus:'all',cities:[],segs:[],stage:null,custStage:null,expanded:[],kpiPeriod:'month',lbScope:'area',sel:null};
 [2,11].forEach(id=>{const _r=R.find(x=>x.id===id);if(_r)_r.focus=true;});
 
 /* ---------- helpers ---------- */
@@ -688,8 +696,8 @@ const surface=el('surface'),mobcol=el('mobcol');
 function matches(r){
   if(S.search){const q=S.search.toLowerCase();if(!(r.doctor.toLowerCase().includes(q)||r.practice.toLowerCase().includes(q)))return false;}
   if(S.focus==='star'&&!r.focus)return false;
-  if(S.city!=='all'&&r.city!==S.city)return false;
-  if(S.seg!=='all'&&r.seg!==S.seg)return false;
+  if(S.cities.length&&!S.cities.includes(r.city))return false;
+  if(S.segs.length&&!S.segs.includes(r.seg))return false;
   return true;
 }
 function firstStage(bd){return BOARDS[bd].cols?BOARDS[bd].cols[0].id:null;}
@@ -891,7 +899,7 @@ const COLDESC={
   'portfolio:notint':{what:'They told you to stay away for now.',todo:['Revisit from time to time — opinions and situations change.','They can re-enter your pipeline later.']},
   'opportunity:odiscover':{what:'Is there a real opportunity? You are still qualifying.',todo:['Learn the practice, pain points and current workflows.','Qualify budget/timeline and find the decision makers.','Run discovery calls.']},
   'opportunity:consult':{what:'Qualified — now prove the value.',todo:['Demos, ROI discussions, workflow conversations, pilots.','Handle objections while DM is being evaluated.']},
-  'opportunity:close':{what:'Commercial stage — heading toward signature.',todo:['Pricing, terms, approvals, procurement, negotiation.','Track the category: Red Hot / On Hold / Pushed Out.','Watch the Order Form Sent / Viewed badges.']},
+  'opportunity:close':{what:'Commercial stage — heading toward signature.',todo:['Pricing, terms, approvals, procurement, negotiation.','Track the category: Red Hot / On Hold.','Watch the Order Form Sent / Viewed badges.']},
   'opportunity:won':{what:'Signed — the customer moves into onboarding.',todo:['Hand off cleanly so onboarding starts fast.']},
   'opportunity:lost':{what:"Will not proceed — and that's OK.",todo:['Set a Closed Lost Reason.','The contact returns to your Portfolio for later.']}
 };
@@ -1141,7 +1149,7 @@ function attemptMove(id,toStage){
 function openCloseCat(r){
   openSheet(`<div class="sheet"><div class="sheet-h"><h3>Close — pick a category</h3><button class="x" data-close>×</button></div>
     <div class="sheet-b"><p style="margin:0 0 .8rem;color:var(--ink-2);font-size:.85rem">Close isn't one stage — choose how the deal is tracking. This sets the swimlane.</p>
-    <div class="movelist">${['Red Hot','On Hold','Pushed Out'].map(sw=>`<button data-cc="${sw}"><span class="dot" style="background:#e07800"></span>${sw}${r.momentum===sw?'<small>current</small>':''}</button>`).join('')}</div></div></div>`);
+    <div class="movelist">${['Red Hot','On Hold'].map(sw=>`<button data-cc="${sw}"><span class="dot" style="background:#e07800"></span>${sw}${r.momentum===sw?'<small>current</small>':''}</button>`).join('')}</div></div></div>`);
   sheetHost().querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{r.stage='close';r.momentum=b.dataset.cc;closeSheet();render();toast(`${r.doctor} → Close · ${r.momentum}`);});
 }
 
@@ -1170,7 +1178,7 @@ function openMove(r){
     b.cols.forEach(c=>{
       if(c.id===r.stage&&c.id!=='close')return;
       if(c.id==='close'){
-        ['Red Hot','On Hold','Pushed Out'].forEach(sw=>{
+        ['Red Hot','On Hold'].forEach(sw=>{
           if(r.stage==='close'&&r.momentum===sw)return;
           opts+=optBtn('#e07800','Close · '+sw,r.id,'close:'+sw,false,r.stage==='close'?'switch':'Close phase');
         });
@@ -1464,9 +1472,21 @@ function buildSuggestions(q){
   sug.querySelectorAll('[data-goid]').forEach(b=>b.onclick=()=>{const r=R.find(x=>x.id===+b.dataset.goid);sug.classList.remove('show');el('search').value='';S.search='';S.board=r.board;S.expanded=[];S.stage=firstStage(r.board);render();openPanel(r.id);});
 }
 // populate city filter from preloaded data
-el('citySel').insertAdjacentHTML('beforeend',CITIES.map(c=>`<option>${c}</option>`).join(''));
-el('citySel').onchange=e=>{S.city=e.target.value;el('fltCity').classList.toggle('active',S.city!=='all');render();};
-el('segSel').onchange=e=>{S.seg=e.target.value;el('fltSeg').classList.toggle('active',S.seg!=='all');render();};
+function msSummary(key){const arr=key==='city'?S.cities:S.segs;if(!arr.length)return key==='city'?'All cities':'All';if(arr.length<=2)return arr.join(', ');return arr.length+(key==='city'?' cities':' segments');}
+function buildMs(key){
+  const arr=key==='city'?S.cities:S.segs;const pop=el(key==='city'?'cityPop':'segPop');
+  const groups=key==='city'?[{options:CITIES}]:[{label:'Prospects',options:['P1','P2','P3','P4']},{label:'Customers',options:['E1','E2','E3','E4','E5']}];
+  let h=`<button class="ms-all" data-all>All ${key==='city'?'cities':'segments'}</button>`;
+  groups.forEach(g=>{if(g.label)h+=`<div class="ms-grp">${g.label}</div>`;g.options.forEach(o=>{h+=`<label class="ms-opt"><input type="checkbox" data-v="${o}" ${arr.includes(o)?'checked':''}><span>${o}</span></label>`;});});
+  pop.innerHTML=h;
+  pop.querySelector('[data-all]').onclick=e=>{e.stopPropagation();if(key==='city')S.cities=[];else S.segs=[];afterMs(key);};
+  pop.querySelectorAll('input[data-v]').forEach(cb=>cb.onchange=()=>{let a=(key==='city'?S.cities:S.segs).slice();const v=cb.dataset.v;if(cb.checked){if(!a.includes(v))a.push(v);}else a=a.filter(x=>x!==v);if(key==='city')S.cities=a;else S.segs=a;afterMs(key);});
+}
+function afterMs(key){el(key==='city'?'citySum':'segSum').textContent=msSummary(key);el(key==='city'?'fltCity':'fltSeg').classList.toggle('active',(key==='city'?S.cities:S.segs).length>0);buildMs(key);render();}
+function closeAllMs(){['cityPop','segPop'].forEach(id=>el(id).classList.remove('show'));}
+['city','seg'].forEach(key=>{buildMs(key);const chip=el(key==='city'?'fltCity':'fltSeg'),pop=el(key==='city'?'cityPop':'segPop');
+  chip.addEventListener('click',e=>{e.stopPropagation();if(pop.contains(e.target))return;const open=pop.classList.contains('show');closeAllMs();if(!open)pop.classList.add('show');});});
+document.addEventListener('click',closeAllMs);
 el('priSel').onchange=e=>{S.focus=e.target.value;el('fltPri').classList.toggle('active',S.focus!=='all');render();};
 
 /* ---------- coach ---------- */
